@@ -3,9 +3,15 @@ import requests, random, os, threading, sys, time, csv, datetime
 #主界面函数
 
 def advancedio():
-    print(str(sys.argv)) #第0个一般是代码文件名本身
+    #print(str(sys.argv)) #第0个一般是代码文件名本身
     if len(sys.argv) == 1: #如果直接运行，进入main
-        main()
+        command = input()
+        if command == "TAFKer2017": #开发者模式密码
+            main()
+        elif command.lower() == 'p': #手动登录模式
+            ploginer()
+        else:
+            newloginer(mode=0)
     else:
         if sys.argv[1] == '--info':
             info()
@@ -16,43 +22,49 @@ def advancedio():
             for inputfile in sys.argv[3:]:
                 inputlist.append(inputfile)
             csvcombiner(inputlist, output=sys.argv[2])
-        else: #如果没有特殊argument，进入正常模式
+        else: #命令行开启时，如果没有特殊argument，进入正常模式
             main()
 
 def main():
     clear()
     print("""
-==校园网小助手简体中文威力加强免安装绿色版 V2.12==
+==校园网小助手简体中文威力加强免安装绿色版 V3.11==
 
-I/i/info    - 版本信息
-H/h/help    - 帮助信息
+I/i/info     - 版本信息
+H/h/help     - 帮助信息
 
-T/t/tester  - 网络测试
-L/l/loginer - 基本登录
+T/t/tester   - 网络测试
+L/l/loginer  - 基本登录
+N/n/nloginer - 新版登录
+P/p/ploginer - 手动登录
 
-F/f/finder  - 手动搜索
-A/a/auto    - 自动搜索
-C/c/csvio   - 表格交互
+F/f/finder   - 手动搜索
+A/a/auto     - 自动搜索
+C/c/csvio    - 表格交互
 
-Q/q/quit    - 退出
+Q/q/quit     - 退出
     """)
 
     command = input("输入指令：")
-    if command in ['I','i', "info"]:
+    if command.lower() in ['i', "info"]:
         info()
-    if command in ['H', 'h', "help"]:
+    if command.lower() in ['h', "help"]:
         helper()
-    elif command in ['F', 'f', "finder"]:
+    elif command.lower() in ['f', "finder"]:
         finder()
-    elif command in ['L', 'l', "loginer"]:
+    elif command.lower() in ['l', "loginer"]:
         loginer()
-    elif command in ['T', 't', "tester"]:
+    elif command.lower() in ['n', "nloginer"]:
+        newloginer(mode=1)
+    elif command.lower() in ['p', "ploginer"]:
+        ploginer()
+    elif command.lower() in ['t', "tester"]:
         tester()
-    elif command in ['A', 'a', "auto"]:
+    elif command.lower() in ['a', "auto"]:
         automode()
-    elif command in ['C', 'c', "csvio"]:
+    elif command.lower() in ['c', "csvio"]:
         csvio()
-    elif command in ['Q','q',"quit"]:
+    elif command.lower() in ['q',"quit"]:
         exit()
 
     input("任意键以返回主页")
@@ -173,7 +185,7 @@ def recorder_init(filename):
     print("已创建文件：" + filename)
     return
 
-def recorder(filename, username, password, note):
+def recorder(filename, username, password='ucas', note=""):
     with open(filename, 'a') as csvfile:
         filenames = ['username', 'password', 'note']
         writer = csv.DictWriter(csvfile, fieldnames=filenames)
@@ -198,15 +210,14 @@ def csvcombiner(inputlist, output):
 def csvloginer(filename):
     with open(filename, 'r') as csvfile:
         reader = csv.reader(csvfile)
-        del reader[0] #删除标题
         for data in reader:
             if len(data) >= 3:
-                if searcher(Userdict['code'], 'ucas') == [True, 'OK']:
-                    print(Userdict['name'] + '，您好！')
-                    input("[成功]登录（" + data[0] + "|" + data[1] + "），回车以继续")
-                else:
-                    input("[失败]登录（" + data[0] + "|" + data[1] + "），回车以继续")
-        print("已结束")
+                if data[0] != 'username': #跳过第一行
+                    if searcher(data[0], data[1]) == [True, 'OK']:
+                        input("[成功]登录（" + data[0] + "|" + data[1] + "），回车以继续")
+                    else:
+                        input("[失败]登录（" + data[0] + "|" + data[1] + "），回车以继续")
+        print("列表登录已结束")
 
 #遍历用户名工具函数
 
@@ -515,6 +526,133 @@ def loginer():
             quitter()
     print("很抱歉！已经没有任何可用账号！")
 
+def newloginer(mode):
+
+    userlist=[
+        ["baixy", "白湘云"],
+        ["chengdh", "程东华"],
+        ["chenxl", "陈相龙"],
+        ["crzhang", "张串绒"],
+        ["cxliu", "刘纯熙"],
+        ["dbzheng", "郑大彬"],
+        ["dengzg", "邓祖淦"],
+        ["dongcy", "董传仪"],
+        ["dongyf", "董佑发"],
+        ["dongzg", "董志刚"],
+        ["fmzhou", "周飞艨"],
+        ["gaojs", "高建生"],
+        ["gengjy", "耿江元"],
+        ["gfwei", "魏国锋"],
+        ["ghxiong", "熊国华"],
+        ["ghzhou", "周国慧"],
+        ["gnzhao", "赵歌喃"],
+        ["goting", "龚婷"],
+        ["guanxh", "管旭红"],
+        ["hines", "hines"],
+        ["hliang", "梁华"],
+        ["hscong", "黄思聪"],
+        ["huangye", "黄野"],
+        ["jhong", "姜红"],
+        ["jhyang", "杨建华"],
+        ["jiangrj", "姜汝俊"],
+        ["jnpan", "潘结南"],
+        ["jstian", "田建生"],
+        ["kqding", "丁克诠"],
+        ["langyy", "郎蕴瑛"],
+        ["lcyang", "李朝阳"],
+        ["liugt", "刘功田"],
+        ["liuxh", "刘小惠"],
+        ["lszhou", "周连生"],
+        ["lxgui", "李新贵"],
+        ["lxliu", "刘利新"],
+        ["maojw", "毛建文"],
+        ["maosp", "毛士鹏"],
+        ["mengyx", "孟艳霞"],
+        ["panjl", "潘建林"],
+        ["panxp", "潘辛平"],
+        ["qianxb", "钱秀斌"],
+        ["rwzhang", "张仁武"],
+        ["tjhuang", "黄铁军"],
+        ["twchen", "twchen"],
+        ["twchiang", "twchiang"],
+        ["twchou", "twchou"],
+        ["twlin", "twlin"],
+        ["wangwx", "王文新"],
+        ["xfang", "方锡生"],
+        ["xfwang", "王小芬"],
+        ["xfzhao", "赵险峰"],
+        ["xiangnz", "向南宗"],
+        ["xlzhang", "张兴兰"],
+        ["xyliu", "刘新彦"],
+        ["yaoym", "姚英明"],
+        ["yhzhang", "张亚红"],
+        ["yinxz", "尹新征"],
+        ["yjzhou", "周玉洁"],
+        ["ylhou", "侯彦林"],
+        ["yqzhao", "赵亚群"],
+        ["yschen", "陈一帅"],
+        ["yzzhao", "赵袆喆"],
+        ["zbsun", "孙正滨"],
+        ["zddai", "戴宗铎"],
+        ["zdzhang", "张正东"],
+        ["zengxq", "曾小青"],
+        ["zhanglp", "章丽萍"],
+        ["zhangyc", "张彦春"],
+        ["zhangyk", "张钰坤"],
+        ["zhouwy", "周文源"],
+        ["zhuxq", "朱兴全"]
+    ]
+    random.shuffle(userlist)
+
+    if mode == 0: #匿踪模式
+        if tester(0): #测试通过
+            for Userdict in userlist:
+                if searcher(Userdict[0], 'ucas') == [True, 'OK']:
+                    exit()
+            input("wasted")
+            exit()
+        else:
+            input("failed")
+            exit()
+
+    if mode == 1: #开放模式
+        clear()
+        print("""
+==自动登录器 V2.0==
+本程序仅供学习编程语言和观摩校园网账号使用，请不要使用流量
+如果账号内有余额，切勿使用！
+""")
+        input("为了世界和平请不要外传！输入回车继续\n")
+        for Userdict in userlist:
+            if searcher(Userdict[0], 'ucas') == [True, 'OK']:
+                print(Userdict[1] + '，您好！')
+                if input('输入y或Y确认登录，否则继续：') == ('y' or 'Y'):
+                    exit()
+                quitter()
+        print("很抱歉！已经没有任何可用账号！")
+
+def ploginer():
+    clear()
+    command = input("""
+==个人登录器读取与存储 V1.0==
+
+存储给定的账号密码，以方便自动登录
+每次录入会覆盖之前录入的信息
+
+S/s/save - 录入信息
+L/l/load - 读取登录
+
+请输入指令：""")
+    if command.lower() in ['s','save']:
+        recorder_init('.personal.csv')
+        stoper='\n'
+        while stoper=='\n':
+            recorder('.personal.csv',input("请输入用户名："),input("请输入密码："),'manual_input')
+            stoper = input("输入任意内容以结束录入，否则继续：")
+        ploginer()
+    elif command.lower() in ['l','load']:
+        csvloginer('.personal.csv')
+
 def csvio():
     clear()
     print("""
@@ -537,9 +675,10 @@ L/l/login   - 表格登录
     else:
         csvio()
 
-def tester():
+def tester(mode=1):
     filename = 'test_record.csv'
-    recorder_init(filename)
+    if mode==1:
+        recorder_init(filename)
     result_list = []
     confirm_list = [
         "sb[False, 'account not exist']",
@@ -553,13 +692,16 @@ def tester():
     for username in ['sb', 'gl', 'jzhu', 'libo', 'liangaiping', 'lxxy', 'baixy']:
         result = searcher(username, 'ucas')
         result_list.append(username + str(result))
-        recorder(filename, username, 'ucas', result[1])
+        if mode==1:
+            recorder(filename, username, 'ucas', result[1])
     quitter()
     if result_list == confirm_list:
-        print("测试成功！可以使用")
+        if mode==1:
+            print("测试成功！可以使用")
         return True
     else:
-        print("测试不成功！请检查运行环境或反馈bug")
+        if mode==1:
+            print("测试不成功！请检查运行环境或反馈bug")
         return False
 
 def automode():
@@ -568,7 +710,7 @@ def automode():
     command = int(input("""
 ==自动模式 (2019-06-25)==
 先确认连接的是UCAS的WiFi
-请输入1到6之间的数字："""))
+请输入1到7之间的数字："""))
     print("==开始运行，网络断开==")
     if command == 1:
         newuserfinder(0, 12, 1)
@@ -582,6 +724,8 @@ def automode():
         newuserfinder(12, 24, 2)
     elif command == 6:
         traditionfinder(700000, 1005001)
+    elif command == 7:
+        csvloginer('record.csv')
     else:
         input('什么玩意儿，输错了，任意键重开')
         automode()
@@ -612,6 +756,12 @@ V2.00 - 20190626
     初期稳定版
 V2.10 - 20190626
     用户名搜索器升级
+V2.22 - 20190626
+    增加新的自动模式，用于下一步工作
+V3.00 - 20190626
+    增加普通模式，输入开发者模式密码以进入完全版
+V3.10 - 20190626
+    增加手动登录模式，可以录入和读取信息
 
 【用户名搜索器】
 V1.0 - 20190625
@@ -636,12 +786,18 @@ V0.6 - 20190624
     由于程序泄露，增加一部分账号
 V1.0 - 20190625
     整合到一个程序内
+V2.0 - 20190626
+    增加新登录器，并且加入匿踪模式
+V2.1 - 20190626
+    增加手动登录器，可以用于录入和读取信息
 
 【表格交互器】
 V0.1 - 20190626
     表格合并器和登录器
 V0.2 - 20190626
     修复一些BUG
+V1.0 - 20190626
+    修复BUG，登录器现在可以使用
 
 ©2019 朝鲜世宗大王第一大学高材生团体. All rights reserved.
 = = = = = = = = = = = = = = = = =
@@ -651,11 +807,18 @@ def helper():
     clear()
     print("""
 = = = = = = = = = = = = = = = = =
-帮助信息（直接使用命令行）
+帮助信息
 
---cc   调用csvcombiner，之后输入一个输出文件和一个输入文件（使用linux更方便）
+【命令行界面】
+--cc   调用csvcombiner，之后输入一个输出文件和一个输入文件（建议使用linux）
 --help 帮助文档
 --info 版本信息
+
+【直接打开】
+直接回车使用新登录器随机登录账号
+输入大小写p进入手动登录模式
+输入密码进入开发者模式（密码：TAFKer2017）
+使用命令行可以直接进入开发者模式
 = = = = = = = = = = = = = = = = =
     """)
 
