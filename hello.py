@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import requests, random, os, threading, sys, time, csv, datetime
 
 #主界面函数
