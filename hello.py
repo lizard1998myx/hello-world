@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/data/data/com.termux/files/usr/bin/python3
 
 import requests, random, os, threading, sys, time, csv, datetime
 
@@ -30,7 +30,7 @@ def advancedio():
 def main():
     clear()
     print("""
-==校园网小助手简体中文威力加强免安装绿色版 V4.0==
+==校园网小助手简体中文威力加强免安装绿色版 V4.01==
 
 I/i/info     - 版本信息
 H/h/help     - 帮助信息
@@ -488,10 +488,11 @@ csv文件 - 记录始末位置，保存尝试结果
     charstr = '\n' + input("请输入要尝试的字符串：")
 
     userlist=[] #用户名列表
-    stoper=''
-    while stoper == '':
-        userlist.append(input("请输入用户名："))
-        stoper = input("输入任意内容以结束录入，否则继续：")
+    addname='0'
+    while addname != '':
+        addname=input("请输入用户名，直接回车则停止录入：")
+        if addname!= '':
+            userlist.append(addname)
 
     charlist = list(charstr)
     print("==运行参数==" +
@@ -844,6 +845,8 @@ V3.10 - 20190626
     增加手动登录模式，可以录入和读取信息
 V4.00 - 20190627
     增加密码破解模式
+V4.01 - 20190627
+    优化输入逻辑
 
 【用户名搜索器】
 V1.0 - 20190625
@@ -864,6 +867,8 @@ V2.2 - 20190626
 【密码搜索器】
 V1.0 - 20190627
     完全自定义密码搜索器
+V1.1 - 20190627
+    优化输入逻辑
 
 【自动登录器】
 V0.5 - 20190103
