@@ -5,6 +5,8 @@ hello.py can be run on android devices with termux
 
 [should run the following commands]
 
+apt-get update
+
 apt-get install python
 
 apt-get install git
