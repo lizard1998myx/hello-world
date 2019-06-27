@@ -19,6 +19,6 @@ git clone https://github.com/lizard1998myx/hello-world/
 
 cp ./hello-world/hello.py .
 
-chmod hello.py
+chmod +x hello.py
 
 ./hello.py
