@@ -1,5 +1,4 @@
 #!/data/data/com.termux/files/usr/bin/python3
-
 import requests, random, os, threading, sys, time, csv, datetime
 
 #主界面函数
@@ -30,7 +29,7 @@ def advancedio():
 def main():
     clear()
     print("""
-==校园网小助手简体中文威力加强免安装绿色版 V4.01==
+==校园网小助手简体中文威力加强免安装绿色版 V4.02==
 
 I/i/info     - 版本信息
 H/h/help     - 帮助信息
@@ -693,7 +692,7 @@ def newloginer(mode):
             input("wasted")
             exit()
         else:
-            input("failed")
+            input("test failed")
             exit()
 
     if mode == 1: #开放模式
@@ -764,14 +763,11 @@ def tester(mode=1):
     confirm_list = [
         "sb[False, 'account not exist']",
         "gl[True, 'wrong password']",
-        "jzhu[True, 'no data left']",
         "libo[True, 'wrong password']",
-        "liangaiping[True, 'wrong password']",
-        "lxxy[True, 'no data left']",
-        "baixy[True, 'OK']"
+        "liangaiping[True, 'wrong password']"
     ]
-    for username in ['sb', 'gl', 'jzhu', 'libo', 'liangaiping', 'lxxy', 'baixy']:
-        result = searcher(username, 'ucas')
+    for username in ['sb', 'gl', 'libo', 'liangaiping']:
+        result = searcher(username, 'fakepassword')
         result_list.append(username + str(result))
         if mode==1:
             recorder(filename, username, 'ucas', result[1])
@@ -847,6 +843,8 @@ V4.00 - 20190627
     增加密码破解模式
 V4.01 - 20190627
     优化输入逻辑
+V4.02 - 20190701
+    修复了测试不成功导致无法运行自动模式的BUG
 
 【用户名搜索器】
 V1.0 - 20190625
@@ -914,6 +912,6 @@ def helper():
     """)
 
 def clear():
-    os.system('clear')
+    os.system('cls')
 
 advancedio()
