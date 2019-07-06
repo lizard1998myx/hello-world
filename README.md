@@ -1,7 +1,7 @@
 # hello-world
-just the first repository
-
 hello.py can be run on android devices with termux
+
+link of termux apk: https://mobile.softpedia.com/apk/termux/
 
 [should run the following commands]
 
