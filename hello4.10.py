@@ -6,13 +6,14 @@ import requests, random, os, threading, sys, time, csv, datetime
 def advancedio():
     #print(str(sys.argv)) #第0个一般是代码文件名本身
     if len(sys.argv) == 1: #如果直接运行，进入main
+        newloginer(mode=0)
         command = input()
         if command == "TAFKer2017": #开发者模式密码
             main()
         elif command.lower() == 'p': #手动登录模式
             ploginer()
         else:
-            newloginer(mode=0)
+            return
     else:
         if sys.argv[1] == '--info':
             info()
@@ -29,13 +30,14 @@ def advancedio():
 def main():
     clear()
     print("""
-==校园网小助手简体中文威力加强免安装绿色版 V4.03==
+==校园网小助手简体中文威力加强免安装绿色版 V4.10==
 
 I/i/info     - 版本信息
 H/h/help     - 帮助信息
 T/t/tester   - 网络测试
 
 L/l/loginer  - 旧版登录
+M/m/mloginer - 循环登录
 N/n/nloginer - 新版登录
 P/p/ploginer - 手动登录
 
@@ -58,6 +60,8 @@ Q/q/quit     - 退出
         decipher()
     elif command.lower() in ['l', "loginer"]:
         loginer()
+    elif command.lower() in ['m', "mloginer"]:
+        newloginer(mode=2)
     elif command.lower() in ['n', "nloginer"]:
         newloginer(mode=1)
     elif command.lower() in ['p', "ploginer"]:
@@ -691,12 +695,12 @@ def newloginer(mode):
         if tester(0): #测试通过
             for Userdict in userlist:
                 if searcher(Userdict[0], 'ucas') == [True, 'OK']:
-                    exit()
+                    return
             input("wasted")
-            exit()
+            return
         else:
             input("test failed")
-            exit()
+            return
 
     if mode == 1: #开放模式
         clear()
@@ -713,6 +717,14 @@ def newloginer(mode):
                     exit()
                 quitter()
         print("很抱歉！已经没有任何可用账号！")
+    
+    if mode == 2: #循环自动模式
+        for Userdict in userlist:
+            if searcher(Userdict[0], 'ucas') == [True, 'OK']:
+                print(Userdict[1] + '，您好！')
+                time.sleep(3600)
+        print("一个循环完毕！")
+        newloginer(2)
 
 def ploginer():
     clear()
@@ -886,6 +898,8 @@ V2.1 - 20190626
     增加手动登录器，可以用于录入和读取信息
 V2.2 - 20190701
     修复手动登录器的问题
+V3.0 - 20190802
+    增加每小时刷新的循环登录器
 
 【表格交互器】
 V0.1 - 20190626
@@ -895,7 +909,7 @@ V0.2 - 20190626
 V1.0 - 20190626
     修复BUG，登录器现在可以使用
 
-©2019 朝鲜世宗大王第一大学高材生团体. All rights reserved.
+©2019 朝鲜世宗大王第一大学. All rights reserved.
 = = = = = = = = = = = = = = = = =
     """)
 
