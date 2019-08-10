@@ -1,4 +1,5 @@
-import sys, csv
+import sys
+import csv
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from urllib.error import HTTPError
@@ -61,8 +62,6 @@ class Candidate():  # 黑洞候选体，对应一个成语，getinfo用到具体
         except HTTPError as e:
             print("\n[HTTPError] " + self.word)
             logger("[HTTPError]", self.word)
-
-        # self.word = self.link
         """
         以上需要用bs4从链接中获取成语信息
         """
@@ -75,9 +74,9 @@ class Candidate():  # 黑洞候选体，对应一个成语，getinfo用到具体
         raw_pinyin = raw_pinyin.replace('ǎ', 'a')
         raw_pinyin = raw_pinyin.replace('à', 'a')
         raw_pinyin = raw_pinyin.replace('ō', 'o')
-        raw_pinyin = raw_pinyin.replace('ó', 'o')
-        raw_pinyin = raw_pinyin.replace('ǒ', 'o')
         raw_pinyin = raw_pinyin.replace('ò', 'o')
+        raw_pinyin = raw_pinyin.replace('ǒ', 'o')
+        raw_pinyin = raw_pinyin.replace('ó', 'o')
         raw_pinyin = raw_pinyin.replace('ē', 'e')
         raw_pinyin = raw_pinyin.replace('é', 'e')
         raw_pinyin = raw_pinyin.replace('ě', 'e')
@@ -99,12 +98,27 @@ class Candidate():  # 黑洞候选体，对应一个成语，getinfo用到具体
         self.pinyin = []
         str = ""
         for char in raw_pinyin:
+            if char.isspace() or char in [',', '，']:  # 如果是空格或逗号
+                if str != "":
+                    self.pinyin.append(str)
+                    str = ""
+            else:  # 如果是拼音字符
+                str = str + char
+        if str != "":
+            self.pinyin.append(str)
+
+        """
+        # Original
+        self.pinyin = []
+        str = ""
+        for char in raw_pinyin:
             if char != " ":
                 str = str + char
             if char == " ":
                 self.pinyin.append(str)
                 str = ""
         self.pinyin.append(str)
+        """
 
     def getfirst(self):
         return self.pinyin[0]
@@ -124,7 +138,7 @@ class SpecType():  # 光谱型，对应一种光谱（拼音），有可能是�
 
     def addfirst(self, n=1):
         self._first += int(n)
-        
+
     def addlast(self, n=1):
         self._last += int(n)
 
@@ -145,20 +159,20 @@ class Catalogue(list):  # 星表，记录各类光谱型出现数量
         for spt in self:
             if first_pinyin == spt.pinyin:
                 spt.addfirst()
-                return 
+                return
         new_spt = SpecType(first_pinyin)
         new_spt.addfirst()
         self.append(new_spt)
-        
+
     def _load_last(self, last_pinyin):  # 当拼音在末尾出现
         for spt in self:
             if last_pinyin == spt.pinyin:
                 spt.addlast()
-                return 
+                return
         new_spt = SpecType(last_pinyin)
         new_spt.addlast()
         self.append(new_spt)
-        
+
     def load(self, candidate):  # 将候选体的信息录入到星表
         if candidate.pinyin != []:
             self._load_first(candidate.getfirst())
@@ -173,24 +187,32 @@ class Catalogue(list):  # 星表，记录各类光谱型出现数量
 
 
 class Observer():  # 观测者，寻找黑洞候选体，并且放入星表中，用到具体网站
-    def __init__(self):
+    def __init__(self, min=27, max=422):
+        self._min = min
+        self._max = max
+        self._length = self._max - self._min + 1
         self.catalog = Catalogue()
         self.region = ""  # 天区，在天区中有若干个黑洞候选体
-        self._no = 27  # 天区坐标，使用时，26为空白天区，27开始是实际天区
+        self._no = self._min  # 天区坐标，使用时，26为空白天区，27开始是实际天区
         self._map = []  # 黑洞地图，用于寻找黑洞
-        self._nameregion()
+        self._name()
+        
+    def state(self):
+        return [str(self._no),self.region]
 
-    def setregion(self, no=27):
+    def setno(self, no=-1):
+        if no < 0:
+            no = self._min
         self._no = no
-        self._nameregion()
+        self._name()
 
-    def _nameregion(self):
+    def _name(self):
         self.region = "https://m.chazidian.com/chengyu_a_" + str(self._no) + "/"
 
-    def nextregion(self):  # 进入下个区域
+    def next(self):  # 进入下个区域/对准下个目标
         self._no += 1
-        if self._no <= 422:  # 422
-            self._nameregion()
+        if self._no <= self._max:
+            self._name()
             return True
         else:
             return False
@@ -232,29 +254,29 @@ class Observer():  # 观测者，寻找黑洞候选体，并且放入星表中�
         """
 
     def work(self):  # 工作：观测并记录
-        region_state = True
-        while region_state:
+        in_field_of_view = True
+        while in_field_of_view:
             for candidate in self._observe():
                 self.catalog.load(candidate)
-            region_state = self.nextregion()
+            in_field_of_view = self.next()
 
     def report(self):
         self._map = self.catalog.makemap()
-        total = self.total()
+        total = str(self.total())
         print("\n[Total]" + total)
         logger("[Total]", total)
         print("[Black Hole Map]\n" + self._map)
         logger("[Black Hole Map]", self._map)
 
     def search(self):
-        region_state = True
-        while region_state:
+        in_field_of_view = True
+        while in_field_of_view:
             for candidate in self._observe():
                 if not candidate.isempty():
                     if candidate.getlast() in self._map:  # 如果此候选体是黑洞
                         print("\n[Black hole] " + str(candidate))
                         logger("[Black Hole]", str(candidate))
-            region_state = self.nextregion()
+            in_field_of_view = self.next()
 
     def manual_check(self, pinyin):
         for spt in self.catalog:
@@ -268,18 +290,49 @@ class Observer():  # 观测者，寻找黑洞候选体，并且放入星表中�
         for spt in self.catalog:
             n += spt.total()
         return n/2
+    
+    def working(self):
+        try:
+            self.work()
+        except BaseException as e:
+            print("[Work Error] " + str(self.state()) + str(e))
+            logger("[Work Error]",str(e))
+            logger(str(self.state()[0]),str(self.state()[1]))
+            self.work()
+    
+    def searching(self):
+        try:
+            self.search()
+        except BaseException as e:
+            print("[Search Error] " + str(self.state()) + str(e))
+            logger("[Search Error]"+str(self.state()),str(e))
+            self.search()
+            
+    def pipeline(self):
+        try:
+            logger_init()
+            self.working()  # 重复工作
+            try:
+                self.report()
+            except BaseException as e:
+                print("[Report Error] " + str(e))
+                logger("[Report Error]", str(e))
+            self.setno()
+            self.searching()  # 重复搜寻
+            while True:
+                self.manual_check(input("Enter pinyin:"))
+        except BaseException as e:
+            print("[Pipeline Error] " + str(e))
+            logger("[Pipeline Error]", str(e))
+            logger(str(self.state()[0]), str(self.state()[1]))
+        input("[Pipeline Done]\n")
 
     @staticmethod
     def plan():
         print("Black Hole Observatory Alpha (20190809)")
         print("Based on http://www.chazidian.com")
-        logger_init()
-        obs = Observer()
-        obs.work()  # 工作，可以重复
-        obs.report()
-        obs.setregion()
-        obs.search()  # 搜寻，可以重复
-        while True:
-            obs.manual_check(input("Enter pinyin:"))
+        Observer().pipeline()
 
-Observer.plan()
+
+if __name__ == '__main__':
+    Observer.plan()
