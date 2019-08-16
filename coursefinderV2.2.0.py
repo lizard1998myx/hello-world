@@ -81,7 +81,27 @@ class Course():
         self.location = self._schedule_info("上课地点")
 
     def rearrange(self):  # 优化输出结果，例如开课周信息
-        pass
+        new_week = ""
+        new_week_list = []
+        for week in self.week.split("|"):
+            new_string = ""
+            start = -1
+            last = -1
+            for n in week.split("、"):
+                n = int(n)
+                if start==-1:
+                    start = n
+                elif n!=last+1:
+                    if new_string != "":
+                        new_string += ", "
+                    new_string += str(start) + "-" + str(last)
+                last = n
+            new_week_list.append(new_string)
+        for new_string in new_week_list:
+            if new_week != "":
+                new_week += "|"
+            new_week += new_string
+        self.week = new_week
 
     def record(self):
         self.rearrange()
@@ -118,6 +138,8 @@ class CSVTable():
     def __init__(self, filename, colnames):
         self.filename = filename
         self.colnames = colnames
+
+    def create(self):
         try:
             with open(self.filename, 'w', newline='') as csvfile:
                 writer = csv.writer(csvfile)
@@ -155,15 +177,17 @@ class Finder():
         self.end = end
         self.filename = filename
         self._length = self.end - self.start
+        self.now = start
 
     def input(self):
         help_info = """
-==课程网站小助手 V2.1.0==
+==课程网站小助手 V2.2.0==
 输入数值范围在国科大课程网站中搜索本科生/研究生课程
-模式：默认手动输入，T进行测试，Q退出
+模式：默认手动输入，T进行测试，C/L自动继续，Q退出
 开始和结束值均包含在搜索范围之中
 建议使用 Microsoft Office Excel 的筛选功能处理表格
 首次使用请先测试
+如果没有完整运行请重新打开使用继续模式
 举例：
 从153303到158499是2018-2019春季学期本科课程
 从163564到164506是2019-2020秋季学期本科课程
@@ -176,6 +200,10 @@ class Finder():
             self.test()
             self.input()
             return
+        elif mode.lower()[0] in ['c', 'l']:
+            self.load()
+            self.run()
+            return
         elif mode.lower()[0] == 'q':
             input("[回车以退出]")
             return
@@ -187,6 +215,7 @@ class Finder():
         self.end = int(input("[结束值：] "))
         self.filename = '课程信息_' + str(self.start) + '-' + str(self.end) + \
                "_" + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') + '.csv'
+        self.end += 1  # 结束值进行了修正，更符合常理
         self._length = self.end - self.start
         self.run()
         input("[运行完毕，回车退出]")
@@ -196,14 +225,42 @@ class Finder():
                     "学分", "开课周", "星期节次", "教室",
                     "主讲教师", "课程大纲", "时间地点", "联系方式"]
         tb = CSVTable(self.filename, colnames)
-        for now in range(self.start, self.end+1):  # 结束值进行了修正，更符合常理
+        if self.now == self.start:
+            tb.create()
+        for now in range(self.now, self.end):
+            self.now = now
             cs = Course(now, tb)
             cs.pipeline()
             if cs.isexist():
                 info = cs.no + "|" + cs.name
             else:
                 info = cs.no
-            percentage(now-self.start, self._length+1, tip="进度：", info=info)
+            percentage(self.now-self.start, self._length, tip="进度：", info=info)
+            self.autosave()
+
+    def autosave():
+        log = "==课程网站小助手存档文件=="
+        log += "\n文件名：" + self.filename
+        log += "\n开始值：" + str(self.start)
+        log += "\n结束值：" + str(self.end)
+        log += "\n当前进度：" + str(self.now)
+        with open("运行存档.log", "w") as savefile:
+            savefile.write(log)
+			
+    def load():
+        try:
+            with open("运行存档.log", "r") as savefile:
+                log = savefile.read()
+                print("[读取成功]\n" + log)
+        except FileNotFoundError:
+            input("[读取失败]存档不存在！")
+            return
+        loglist = log.splitlines()
+        self.filename = loglist[1][4:]
+        self.start = int(loglist[2][4:])
+        self.end = int(loglist[3][4:])
+        self.now = int(loglist[4][5:])
+        self.run()
 
     @staticmethod
     def test():
@@ -238,8 +295,8 @@ V1.4.0（20190706）加入课程教师信息的链接，出于信息的保护，
 V1.5.0（20190708）增加了把网络故障部分重新搜索的功能
 V2.0.0（20190815）用新的编程思路重写内容，并增加了大量搜索信息
 V2.1.0（20190816）优化了输出表格，做了一些其他调整
+V2.2.0（20190816）缩减输出文件中繁琐的内容，增加进度存取功能
 
 未来更新：
-V2.1.0（20190816）缩减输出文件中不必要的内容
-V2.2.0（20190817）读取文件继续的功能
+V2.3.0（20190817）加入打印可视化课程表的功能
 """
