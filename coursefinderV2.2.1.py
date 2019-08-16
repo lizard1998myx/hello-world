@@ -81,6 +81,8 @@ class Course():
         self.location = self._schedule_info("上课地点")
 
     def rearrange(self):  # 优化输出结果，例如开课周信息
+        if self.week == "":
+            return
         new_week = ""
         new_week_list = []
         for week in self.week.split("|"):
@@ -212,6 +214,7 @@ class Finder():
             self.start = 0
         elif self.start == 250:
             print("韩大佬是我儿子")
+        self.now = self.start
         self.end = int(input("[结束值：] "))
         self.filename = '课程信息_' + str(self.start) + '-' + str(self.end) + \
                "_" + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') + '.csv'
@@ -238,7 +241,7 @@ class Finder():
             percentage(self.now-self.start, self._length, tip="进度：", info=info)
             self.autosave()
 
-    def autosave():
+    def autosave(self):
         log = "==课程网站小助手存档文件=="
         log += "\n文件名：" + self.filename
         log += "\n开始值：" + str(self.start)
@@ -247,7 +250,7 @@ class Finder():
         with open("运行存档.log", "w") as savefile:
             savefile.write(log)
 			
-    def load():
+    def load(self):
         try:
             with open("运行存档.log", "r") as savefile:
                 log = savefile.read()
@@ -296,6 +299,7 @@ V1.5.0（20190708）增加了把网络故障部分重新搜索的功能
 V2.0.0（20190815）用新的编程思路重写内容，并增加了大量搜索信息
 V2.1.0（20190816）优化了输出表格，做了一些其他调整
 V2.2.0（20190816）缩减输出文件中繁琐的内容，增加进度存取功能
+V2.2.1（20190816）修复问题
 
 未来更新：
 V2.3.0（20190817）加入打印可视化课程表的功能
