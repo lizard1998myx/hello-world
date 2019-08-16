@@ -185,7 +185,7 @@ class Finder():
         help_info = """
 ==课程网站小助手 V2.2.0==
 输入数值范围在国科大课程网站中搜索本科生/研究生课程
-模式：默认手动输入，T进行测试，C/L自动继续，Q退出
+模式：默认手动输入，T测试，L读档，Q退出
 开始和结束值均包含在搜索范围之中
 建议使用 Microsoft Office Excel 的筛选功能处理表格
 首次使用请先测试
@@ -195,7 +195,7 @@ class Finder():
 从163564到164506是2019-2020秋季学期本科课程
 """
         print(help_info)
-        mode = input("[模式选择：默认手动，T测试，Q退出] ")
+        mode = input("[模式选择：默认手动，T测试，L读档，Q退出] ")
         if mode == "":
             pass
         elif mode.lower()[0] == 't':
@@ -204,7 +204,6 @@ class Finder():
             return
         elif mode.lower()[0] in ['c', 'l']:
             self.load()
-            self.run()
             return
         elif mode.lower()[0] == 'q':
             input("[回车以退出]")
@@ -263,6 +262,7 @@ class Finder():
         self.start = int(loglist[2][4:])
         self.end = int(loglist[3][4:])
         self.now = int(loglist[4][5:])
+        self._length = self.end - self.start
         self.run()
 
     @staticmethod
